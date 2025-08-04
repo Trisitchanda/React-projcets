@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext';
 import { Storage } from 'appwrite';
 import { client } from '../config/Appwite';
+import { usePosts } from '../context/PostContext';
 
 const storage = new Storage(client);
 const BUCKET_ID = import.meta.env.VITE_APPWRITE_BUCKET;
@@ -11,8 +12,21 @@ const BUCKET_ID = import.meta.env.VITE_APPWRITE_BUCKET;
 const Post = ({ post,index }) => {
     const { user } = useAuth();
     const [imageUrl, setImageUrl] = useState('')
+    const { posts, deletePost } = usePosts();
 
-    
+    const handleDelete = async (id, username) => {
+        if (user.name === username) {
+          try {
+            const postToDelete = posts.find((post) => post.$id === id);
+            if (postToDelete?.imageId) {
+              await storage.deleteFile(BUCKET_ID, postToDelete.imageId);
+            }
+            await deletePost(id);
+          } catch (error) {
+            console.error('Error deleting post:', error);
+          }
+        }
+      };
     
     useEffect(() => {
         (async () => {
