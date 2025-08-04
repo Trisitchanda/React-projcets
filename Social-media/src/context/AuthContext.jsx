@@ -1,7 +1,7 @@
 // AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
-import { account } from '../Appwite';
 import { ID } from 'appwrite';
+import { account } from '../config/Appwite';
 
 const AuthContext = createContext();
 

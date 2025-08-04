@@ -1,46 +1,82 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { usePosts } from '../context/PostContext';
+import { ID, Storage } from 'appwrite';
+import { client } from '../config/Appwite';
+
+const storage = new Storage(client);
+const BUCKET_ID = import.meta.env.VITE_APPWRITE_BUCKET;
 
 const PostBox = () => {
   const [text, setText] = useState('');
   const [image, setImage] = useState(null);
-  
+  const [isUploading, setIsUploading] = useState(false);
+  const { addPost } = usePosts();
+  const { user } = useAuth();
 
-  const handlePost = () => {
-    if (text.trim()) {
+  const handlePost = async () => {
+    if (!text.trim() && !image) return;
+
+    setIsUploading(true);
+
+    try {
+      let imageId = null;
+
+      if (image) {
+        const uploadedFile = await storage.createFile(
+          BUCKET_ID,
+          ID.unique(),
+          image
+        );
+        imageId = uploadedFile.$id;
+        console.log('Image uploaded:', imageId);
+      }
+
       const newPost = {
-        id: Date.now(),
-        username: user.username,
+        username: user.name,
+        userId: user.$id,
+        email: user.email,
         content: text,
+        imageId,
       };
-      addPost(newPost);
+
+      await addPost(newPost);
       setText('');
+      setImage(null);
+    } catch (error) {
+      console.error('Post upload failed:', error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) setImage(file);
+    if (file && file.size < 5 * 1024 * 1024) {
+      setImage(file);
+    } else if (file) {
+      alert('Image size should be less than 5MB');
+    }
   };
 
+  if (!user) return null;
+
   return (
-    <div className="mb-6 bg-gradient-to-br from-white/60 to-white/30 backdrop-blur-md p-6 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700">
+    <div className="mb-6 bg-white p-6 rounded-xl shadow-xl border border-gray-200">
       <textarea
-        className="w-full p-4 text-lg text-gray-800 dark:text-white bg-white/70 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-300 resize-none placeholder-gray-500 dark:placeholder-gray-400"
+        className="w-full p-4 text-lg text-gray-800 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-300 resize-none placeholder-gray-500"
         rows={4}
         placeholder="✨ What's on your mind? ✨"
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
 
-      {/* Image Preview */}
       {image && (
         <div className="relative mt-4">
           <img
             src={URL.createObjectURL(image)}
-            alt="Selected"
-            className="rounded-lg object-cover h-48 w-full border border-white/20 shadow-lg"
+            alt="Preview"
+            className="rounded-lg object-cover h-48 w-full border border-gray-300 shadow"
           />
           <button
             onClick={() => setImage(null)}
@@ -51,7 +87,6 @@ const PostBox = () => {
         </div>
       )}
 
-      {/* Upload + Post Button */}
       <div className="flex items-center justify-between mt-4">
         <label className="cursor-pointer text-sm text-indigo-600 hover:underline flex items-center space-x-2">
           <input
@@ -60,37 +95,23 @@ const PostBox = () => {
             className="hidden"
             onChange={handleImageChange}
           />
-          <span className="inline-flex items-center space-x-1">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-indigo-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 16l4-4a3 3 0 014 0l4 4M13 10V3m0 0L9.5 6.5M13 3l3.5 3.5"
-              />
-            </svg>
-            <span>Upload Image</span>
-          </span>
+          <span>📷 Upload Image</span>
         </label>
 
         <button
           onClick={handlePost}
-          className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-pink-500 hover:to-indigo-500 text-white font-semibold px-6 py-2 rounded-full shadow-lg transition-all duration-300 hover:scale-105"
+          disabled={isUploading || (!text.trim() && !image)}
+          className={`bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-6 py-2 rounded-full shadow-lg transition-all duration-300 hover:scale-105 ${
+            isUploading || (!text.trim() && !image)
+              ? 'opacity-50 cursor-not-allowed'
+              : ''
+          }`}
         >
-          🚀 Post
+          {isUploading ? '⏳ Posting...' : '🚀 Post'}
         </button>
       </div>
     </div>
-
-
   );
-
 };
 
 export default PostBox;
