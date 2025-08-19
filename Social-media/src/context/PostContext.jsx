@@ -89,12 +89,9 @@ export function PostProvider({ children }) {
     }
   };
 
-  const ADMIN_ID = import.meta.env.VITE_ADMIN_USER_ID;
-  console.log(ADMIN_ID)
-
   const deletePost = async (id) => {
     try {
-      if (currentUser.$id === ADMIN_ID) {
+      if (currentUser.$id === import.meta.env.VITE_ADMIN_USER_ID) {
         await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, id);
       } else {
         // Normal user can only delete their own (Appwrite enforces this)
