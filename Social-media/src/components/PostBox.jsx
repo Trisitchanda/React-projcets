@@ -40,7 +40,7 @@ const PostBox = () => {
         imageId,
       };
 
-      await addPost(newPost);
+      await addPost(newPost,user);
       setText('');
       setImage(null);
     } catch (error) {
