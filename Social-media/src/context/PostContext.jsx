@@ -15,6 +15,8 @@ const DATABASE_ID = import.meta.env.VITE_APPWRITE_DB;
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION;
 
 
+
+
 const PostContext = createContext();
 export const usePosts = () => useContext(PostContext);
 
@@ -89,17 +91,19 @@ export function PostProvider({ children }) {
     }
   };
 
-  const deletePost = async (id) => {
+  const deletePost = async (id,userId) => {
     try {
-      if (currentUser.$id === import.meta.env.VITE_ADMIN_USER_ID) {
+      const postToDelete = posts.find((post) => post.$id === id);
+  
+      // Only allow if owner or admin
+      if (postToDelete.userId === userId || userId === import.meta.env.VITE_ADMIN_USER_ID) {
         await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, id);
+        setPosts(prev => prev.filter(post => post.$id !== id));
       } else {
-        // Normal user can only delete their own (Appwrite enforces this)
-        await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, id);
+        throw new Error("Not authorized to delete this post.");
       }
-      setPosts(prev => prev.filter(post => post.$id !== id));
     } catch (error) {
-      console.error('Error deleting post:', error);
+      console.error("Error deleting post:", error);
       throw error;
     }
   };

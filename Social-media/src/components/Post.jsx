@@ -15,16 +15,22 @@ const Post = ({ post, index }) => {
     const { posts, deletePost } = usePosts();
 
     const handleDelete = async (id) => {
-            try {
-                const postToDelete = posts.find((post) => post.$id === id);
-                if (postToDelete?.imageId) {
-                    await storage.deleteFile(BUCKET_ID, postToDelete.imageId);
-                }
-                await deletePost(id);
-            } catch (error) {
-                console.error('Error deleting post:', error);
-            }
-    };
+        try {
+          const postToDelete = posts.find((post) => post.$id === id);
+      
+          if (postToDelete?.imageId) {
+            await storage.deleteFile(BUCKET_ID, postToDelete.imageId);
+          }
+      
+          if (postToDelete.userId === user.$id || user.$id === import.meta.env.VITE_ADMIN_USER_ID) {
+            await deletePost(id, user.$id);
+          } else {
+            alert("You don't have permission to delete this post.");
+          }
+        } catch (error) {
+          console.error("Error deleting post:", error);
+        }
+      };
 
     useEffect(() => {
         (async () => {
