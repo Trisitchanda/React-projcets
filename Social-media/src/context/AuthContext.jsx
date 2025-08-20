@@ -19,13 +19,21 @@ export function AuthProvider({ children }) {
 
   const initializeAuth = async () => {
     try {
-      // First check if we have a valid session
+      //checking local storage first
+      const cachedUser = localStorage.getItem("user");
+      if (cachedUser) {
+        setUser(JSON.parse(cachedUser));
+        setLoading(false);
+        return; 
+      }
+      // if there is nothing in local storage
       const session = await account.getSession('current');
       
       // If session exists, get user details
       if (session) {
         const userData = await account.get();
         setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
       }
     } catch (error) {
       // These errors are expected when no session exists
@@ -46,6 +54,7 @@ export function AuthProvider({ children }) {
       // Get updated user data
       const userData = await account.get();
       setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
       return userData;
     } catch (error) {
       console.error('Login error:', error);
@@ -58,6 +67,7 @@ export function AuthProvider({ children }) {
     try {
       await account.deleteSession('current');
       setUser(null);
+      localStorage.removeItem("user");
     } catch (error) {
       console.error('Logout error:', error);
       setError(error.message);

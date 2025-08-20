@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Databases, ID,Permission,Role } from 'appwrite';
 import { useAuth } from './AuthContext';
 import {client} from "../config/Appwite"
@@ -24,12 +24,17 @@ export function PostProvider({ children }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user,loading:authLoading } = useAuth();
+  const subscribed = useRef(false);
 
   useEffect(() => {
+
+    if(authLoading) return;
+    if (!user) return;
     const fetchPosts = async () => {
       try {
         const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
-        setPosts(response.documents.reverse()); // newest first
+        setPosts(response.documents.reverse());
       } catch (error) {
         console.error('Error fetching posts:', error);
         setError(error.message);
@@ -39,7 +44,7 @@ export function PostProvider({ children }) {
     };
     fetchPosts();
 
-    //to see new posts without refresing
+    if (!subscribed.current) {
     const unsubscribe = client.subscribe(
       `databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents`,
       (response) => {
@@ -60,11 +65,12 @@ export function PostProvider({ children }) {
         }
       }
     );
-
+    subscribed.current = true;
     return () => {
         unsubscribe();
     };
-  }, []);
+  }
+  }, [authLoading, user]);
 
 
   const addPost = async (newPost,user) => {

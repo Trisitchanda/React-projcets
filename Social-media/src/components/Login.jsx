@@ -2,15 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom'
 
-// import { Client, Account } from "appwrite";
-
-// const client = new Client()
-//     .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID); // Your project ID
-
-// const account = new Account(client);
-
-
-
 const Login = () => {
     const { login, user } = useAuth()
     const [Email, setEmail] = useState('')
