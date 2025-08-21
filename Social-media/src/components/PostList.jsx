@@ -15,7 +15,7 @@ const PostList = () => {
 
 
   return (
-    <div className="space-y-6 max-h-[500px] overflow-y-auto px-2 scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-transparent">
+    <div className="space-y-6 max-h-[500px] overflow-y-auto px-2 custom-scrollbar">
       {posts.map((post, index) => (
         <Post post={post} key={post.$id} index={index}/>
       ))}

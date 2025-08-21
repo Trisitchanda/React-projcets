@@ -108,7 +108,7 @@ const Post = ({ post, index }) => {
             )}
 
             {/* Like + actions */}
-            {/* <div className="flex items-center gap-3 mt-2">
+            <div className="flex items-center gap-3 mt-2">
                 <button
                     onClick={handleLikeToggle}
                     className={`text-3xl transition-transform transform active:scale-125 ${liked
@@ -121,7 +121,7 @@ const Post = ({ post, index }) => {
                 <span className="text-gray-600 text-sm font-medium">
                     {likeCount} {likeCount === 1 ? "like" : "likes"}
                 </span>
-            </div> */}
+            </div>
 
             {/* Delete button (only for owner or admin) */}
             {(post.userId === user.$id ||

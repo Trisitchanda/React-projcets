@@ -6,7 +6,6 @@ import { PostProvider } from './context/PostContext';
 import AppRoutes from './AppRoutes';
 
 
-
 function App() {
   return (
     <AuthProvider>
