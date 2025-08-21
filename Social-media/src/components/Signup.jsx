@@ -1,26 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Client, Account, ID } from "appwrite";
-
-const client = new Client()
-    .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID); // Your project ID
-
-const account = new Account(client);
-
+import { Link, useNavigate } from 'react-router-dom';
+import { Account, ID } from "appwrite";
+import {client,account} from "../config/Appwite"
 
 
 const SignUp = () => {
     const { register,user } = useAuth();
     const [Email, setEmail] = useState('');
+    const [userName, setuserName] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [btnText, setBtnText] = useState('Sign Up');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-
-    console.log(user);
 
     useEffect(()=>{
         if(user){
@@ -29,8 +23,19 @@ const SignUp = () => {
     },[])
 
     const handleSignUp = async () => {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!Email.trim()) {
             setError('Email is required');
+            return;
+        }
+
+        if (!userName.trim()) {
+            setError('Username  is required');
+            return;
+        }
+
+        if (!emailRegex.test(Email.trim())) {
+            setError('Invalid email format');
             return;
         }
 
@@ -49,7 +54,7 @@ const SignUp = () => {
             setIsLoading(true);
             setBtnText('Creating Account...');
 
-            await register(Email, password);
+            await register(Email, password,userName);
             navigate('/');
 
         } catch (err) {
@@ -81,6 +86,23 @@ const SignUp = () => {
                     )}
 
                     <div className="space-y-6">
+                    <div className="relative group">
+                            <input
+                                type="text"
+                                value={userName}
+                                onChange={(e) => {
+                                    setuserName(e.target.value);
+                                    setError('');
+                                }}
+                                className="w-full px-5 py-3 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 focus:border-purple-400 focus:ring-2 focus:ring-purple-500/30 outline-none transition-all duration-300 text-white placeholder-transparent peer"
+                                placeholder=" "
+                            />
+                            <label className="absolute left-5 -top-2.5 px-1 text-xs text-purple-300 bg-gradient-to-b from-indigo-900/80 to-transparent transition-all duration-300 pointer-events-none peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-3 peer-placeholder-shown:bg-transparent peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-purple-300 peer-focus:bg-gradient-to-b">
+                                Username
+                            </label>
+                            <div className="absolute inset-x-0 bottom-0 h-0.5 bg-purple-500 scale-x-0 origin-left transition-transform duration-500 group-focus-within:scale-x-100"></div>
+                        </div>
+
                         <div className="relative group">
                             <input
                                 type="text"
@@ -137,7 +159,7 @@ const SignUp = () => {
                         <button
                             onClick={handleSignUp}
                             disabled={isLoading}
-                            className={`w-full py-3.5 px-6 rounded-lg text-white font-medium text-lg shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center space-x-2 ${isLoading
+                            className={`w-full cursor-pointer py-3.5 px-6 rounded-lg text-white font-medium text-lg shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center space-x-2 ${isLoading
                                 ? 'bg-purple-700 cursor-not-allowed'
                                 : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 hover:shadow-purple-500/30'
                                 }`}
@@ -154,6 +176,14 @@ const SignUp = () => {
                                 btnText
                             )}
                         </button>
+                        <div className="mt-8 text-center">
+                        <p className="text-white/50 text-sm">
+                            Already a user?
+                            <Link to={'/login'} className="text-purple-300 hover:text-white ml-1 transition-colors duration-300">
+                                Sign in
+                            </Link>
+                        </p>
+                    </div>
                     </div>
                 </div>
 

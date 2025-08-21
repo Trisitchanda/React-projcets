@@ -12,7 +12,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Initialize auth state
   useEffect(() => {
     initializeAuth();
   }, []);
@@ -24,11 +23,11 @@ export function AuthProvider({ children }) {
       if (cachedUser) {
         setUser(JSON.parse(cachedUser));
         setLoading(false);
-        return; 
+        return;
       }
       // if there is nothing in local storage
       const session = await account.getSession('current');
-      
+
       // If session exists, get user details
       if (session) {
         const userData = await account.get();
@@ -58,7 +57,7 @@ export function AuthProvider({ children }) {
       return userData;
     } catch (error) {
       console.error('Login error:', error);
-      setError(formatAuthError(error));
+      setError(error.message);
       throw error;
     }
   };
@@ -93,13 +92,15 @@ export function AuthProvider({ children }) {
   const formatAuthError = (error) => {
     switch (error.code) {
       case 401:
-        return 'Invalid credentials. Please try again.';
+        return 'Incorrect email or password. Please try again.';
+      case 404:
+        return 'No account found with this email. Please sign up first.';
       case 400:
-        return 'Invalid request. Please check your input.';
+        return "Invalid request. Please check your input.";
       case 409:
-        return 'Account already exists with this email.';
+        return "An account already exists with this email.";
       default:
-        return error.message || 'An unexpected error occurred.';
+        return error.message || "An unexpected error occurred.";
     }
   };
 

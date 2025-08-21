@@ -60,7 +60,7 @@ const ForgotPassword = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className={`w-full py-3.5 px-6 rounded-lg text-white font-medium text-lg shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center space-x-2 ${
+                            className={`w-full cursor-pointer py-3.5 px-6 rounded-lg text-white font-medium text-lg shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center space-x-2 ${
                                 isLoading 
                                     ? 'bg-purple-700 cursor-not-allowed' 
                                     : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 hover:shadow-purple-500/30'
@@ -83,7 +83,7 @@ const ForgotPassword = () => {
                     <div className="mt-6 text-center">
                         <button 
                             onClick={() => navigate(-1)}
-                            className="text-purple-300 hover:text-white text-sm transition-colors duration-300 flex items-center justify-center mx-auto"
+                            className="text-purple-300 cursor-pointer hover:text-white text-sm transition-colors duration-300 flex items-center justify-center mx-auto"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

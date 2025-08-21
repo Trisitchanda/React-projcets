@@ -3,12 +3,6 @@ import { Databases, ID,Permission,Role } from 'appwrite';
 import { useAuth } from './AuthContext';
 import {client} from "../config/Appwite"
 
-
-
-// export const client = new Client()
-//   .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT)
-//   .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID);
-
 const databases = new Databases(client);
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DB;
@@ -28,9 +22,8 @@ export function PostProvider({ children }) {
   const subscribed = useRef(false);
 
   useEffect(() => {
-
-    if(authLoading) return;
-    if (!user) return;
+    if (authLoading || !user) return;
+  
     const fetchPosts = async () => {
       try {
         const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
@@ -43,34 +36,44 @@ export function PostProvider({ children }) {
       }
     };
     fetchPosts();
-
+  
+    let unsubscribe = null;
+  
     if (!subscribed.current) {
-    const unsubscribe = client.subscribe(
-      `databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents`,
-      (response) => {
-        // console.log("Realtime event:", response);
+      unsubscribe = client.subscribe(
+        `databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents`,
+        (response) => {
+          if (response.events.includes(
+            `databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents.*.create`
+          )) {
+            setPosts(prev => [response.payload, ...prev]);
+          }
   
-        if (response.events.includes(`databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents.*.create`)) {
-          setPosts(prev => [response.payload, ...prev]);
-        }
+          if (response.events.includes(
+            `databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents.*.delete`
+          )) {
+            setPosts(prev => prev.filter(p => p.$id !== response.payload.$id));
+          }
   
-        if (response.events.includes(`databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents.*.delete`)) {
-          setPosts(prev => prev.filter(p => p.$id !== response.payload.$id));
+          if (response.events.includes(
+            `databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents.*.update`
+          )) {
+            setPosts(prev =>
+              prev.map(p => (p.$id === response.payload.$id ? response.payload : p))
+            );
+          }
         }
+      );
+      subscribed.current = true;
+    }
   
-        if (response.events.includes(`databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents.*.update`)) {
-          setPosts(prev =>
-            prev.map(p => (p.$id === response.payload.$id ? response.payload : p))
-          );
-        }
-      }
-    );
-    subscribed.current = true;
+
     return () => {
-        unsubscribe();
+      if (unsubscribe) unsubscribe();
+      subscribed.current = false;
     };
-  }
   }, [authLoading, user]);
+  
 
 
   const addPost = async (newPost,user) => {
@@ -79,7 +82,12 @@ export function PostProvider({ children }) {
         DATABASE_ID,
         COLLECTION_ID,
         ID.unique(),
-        newPost,
+        {
+            ...newPost,
+            userId: user.$id,      
+            username: user.name,  
+
+        },
         [
           Permission.read(Role.any()),             
           Permission.write(Role.user(user.$id)),
@@ -87,9 +95,6 @@ export function PostProvider({ children }) {
   
         ]
       );
-      // setPosts(prev => [response, ...prev]);
-      // console.log("Created doc with permissions:", response.$permissions);
-      
       return response;
     } catch (error) {
       console.error('Error adding post:', error);

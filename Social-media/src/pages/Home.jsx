@@ -17,7 +17,7 @@ const Home = () => {
   return (
     <div className="max-w-xl mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">Welcome, {user.username}</h1>
+        <h1 className="text-xl font-bold">Welcome, {user.name}</h1>
         <button onClick={logout} className="text-red-500">Logout</button>
       </div>
       <PostBox />

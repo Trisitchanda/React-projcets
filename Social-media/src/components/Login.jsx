@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom'
 
 const Login = () => {
-    const { login, user } = useAuth()
+    const { login, user,error } = useAuth()
     const [Email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false);
@@ -13,16 +13,15 @@ const Login = () => {
         if (user) {
             navigate('/')
         }
-    }, [user,navigate])
+    }, [user, navigate])
 
     const handleLogin = async () => {
-        if (loading) return; // prevent double click
+        if (loading) return;
         setLoading(true);
         try {
-                await login(Email, password);
-                navigate('/');
-        } catch (error) {
-            console.error("Login failed:", error.message);
+            await login(Email, password);
+            navigate('/');
+        } catch {
         } finally {
             setLoading(false);
         }
@@ -41,6 +40,12 @@ const Login = () => {
                         <p className="text-white/70">Sign in to your account</p>
                     </div>
 
+                    {error && (
+                        <div className="mb-6 text-red-400 text-sm text-center bg-red-900/30 border border-red-500/40 rounded-lg p-2">
+                            {error}
+                        </div>
+                    )}
+
                     <div className="space-y-6">
                         <div className="relative group">
                             <input
@@ -57,7 +62,7 @@ const Login = () => {
                             <div className="absolute inset-x-0 bottom-0 h-0.5 bg-purple-500 scale-x-0 origin-left transition-transform duration-500 group-focus-within:scale-x-100"></div>
                         </div>
 
-                        {/* Password Field - Fixed label and type */}
+
                         <div className="relative group">
                             <input
                                 type="password"
@@ -68,7 +73,7 @@ const Login = () => {
                                 required
                             />
                             <label className="absolute left-5 -top-2.5 px-1 text-xs text-purple-300 bg-gradient-to-b from-indigo-900/80 to-transparent transition-all duration-300 pointer-events-none peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-3 peer-placeholder-shown:bg-transparent peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-purple-300 peer-focus:bg-gradient-to-b">
-                                Password  {/* Fixed from duplicate "Email" */}
+                                Password
                             </label>
                             <div className="absolute inset-x-0 bottom-0 h-0.5 bg-purple-500 scale-x-0 origin-left transition-transform duration-500 group-focus-within:scale-x-100"></div>
                         </div>
@@ -76,12 +81,9 @@ const Login = () => {
                         <button
                             onClick={handleLogin}
                             disabled={loading}
-                            className="w-full py-3.5 px-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-lg text-white font-medium text-lg shadow-lg hover:shadow-purple-500/30 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center space-x-2"
+                            className="w-full cursor-pointer py-3.5 px-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-lg text-white font-medium text-lg shadow-lg hover:shadow-purple-500/30 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center space-x-2"
                         >
-                            {/* <span>Continue</span> */}
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
+
                             {loading ? "Logging in..." : "Continue"}
                         </button>
                     </div>
@@ -94,7 +96,7 @@ const Login = () => {
                             </Link>
                         </p>
                         <p className="text-white/50 text-sm">
-                            {/* Forget password? */}
+
                             <Link to={'/ForgetPassword'} className="text-purple-300 hover:text-white ml-1 transition-colors duration-300">
                                 Forget password
                             </Link>
