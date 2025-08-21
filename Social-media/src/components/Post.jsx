@@ -116,7 +116,7 @@ const Post = ({ post, index }) => {
                             : "text-gray-400 hover:text-red-500 hover:scale-110"
                         }`}
                 >
-                    {liked ? "❤️" : "🤍"}
+                    {liked ? "❤︎" : "❤︎"}
                 </button>
                 <span className="text-gray-600 text-sm font-medium">
                     {likeCount} {likeCount === 1 ? "like" : "likes"}
