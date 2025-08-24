@@ -5,6 +5,7 @@ import PostList from '../components/PostList';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import LightRays from '../components/LightRays';
+import GradientText from '../components/GradientText';
 
 const Home = () => {
   const { user, logout } = useAuth();
@@ -47,7 +48,7 @@ const Home = () => {
                           border border-white/20 shadow-xl h-screen sticky top-0">
             <h2 className="text-xl font-bold">Menu</h2>
             <nav className="flex flex-col gap-3 w-full">
-              <button 
+              <button
                 onClick={scrollToTop}
                 className="text-left  px-3 py-2 rounded-lg hover:bg-white/10 transition"
               >
@@ -68,10 +69,19 @@ const Home = () => {
                        custom-scrollbar"
           >
             {/* Header  */}
-            <div className="sticky top-0 z-20 bg-white/10 backdrop-blur-lg py-4 px-4 sm:px-6 border-b border-white/20 flex justify-between items-center">
-              <h1 className=" text-xl sm:text-2xl font-semibold tracking-wide text-white">
-                ✨ Welcome, {user.name}
-              </h1>
+            <div className="sticky top-0 z-20 bg-transparent backdrop-blur-lg py-4 px-4 sm:px-6 border-b border-white/20 flex justify-between items-center">
+              <div className="text-xl sm:text-2xl font-semibold tracking-wide">
+                <GradientText
+                  colors={["#2ecc9a", "#1fa89a", "#345dcf", "#5b2fa0", "#2ecc9a"]
+                }
+                  animationSpeed={8}
+                  showBorder={false}
+                >
+                  ✨ Welcome, {user.name}
+                </GradientText>
+              </div>
+
+
               <button
                 onClick={logout}
                 className="px-4 py-1.5 rounded-lg text-sm font-medium text-blue-500 

@@ -77,66 +77,74 @@ const Post = ({ post, index }) => {
 
     return (
         <div
-            key={post.$id}
-            className="p-6 bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col gap-4 animate-fadeIn"
-            style={{ animationDelay: `${index * 0.05}s` }}
-        >
-            {/* User info */}
-            <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold">
-                    {post.username?.charAt(0).toUpperCase()}
-                </div>
-                <div className="text-indigo-700 font-semibold text-lg">
-                    @{post.username}
-                </div>
-            </div>
-
-            {/* Post text */}
-            <div className="text-gray-800 text-base leading-relaxed tracking-wide">
-                {post.content}
-            </div>
-
-            {/* Post image */}
-            {post.imageId && imageUrl && (
-                <div className="rounded-xl overflow-hidden border border-gray-300 shadow-sm">
-                    <img
-                        src={imageUrl}
-                        alt={`Post by ${post.email}`}
-                        className="w-full h-auto object-cover"
-                    />
-                </div>
-            )}
-
-            {/* Like + actions */}
-            <div className="flex items-center gap-3 mt-2">
-                <button
-                    onClick={handleLikeToggle}
-                    className={`text-3xl transition-transform transform active:scale-125 ${liked
-                            ? "text-red-500"
-                            : "text-gray-400 hover:text-red-500 hover:scale-110"
-                        }`}
-                >
-                    {liked ? "❤︎" : "❤︎"}
-                </button>
-                <span className="text-gray-600 text-sm font-medium">
-                    {likeCount} {likeCount === 1 ? "like" : "likes"}
-                </span>
-            </div>
-
-            {/* Delete button (only for owner or admin) */}
-            {(post.userId === user.$id ||
-                user.$id === import.meta.env.VITE_ADMIN_USER_ID) && (
-                    <div className="flex justify-end mt-3">
-                        <button
-                            onClick={() => handleDelete(post.$id)}
-                            className="text-sm text-red-600 hover:text-white hover:bg-red-600 font-medium px-4 py-1.5 rounded-full border border-red-300 transition"
-                            title="Delete your post"
-                        >
-                            ❌ Delete
-                        </button>
-                    </div>
-                )}
+    key={post.$id}
+    className="p-6 bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col gap-4 animate-fadeIn"
+    style={{ animationDelay: `${index * 0.05}s` }}
+>
+    {/* User info */}
+    <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold">
+            {post.username?.charAt(0).toUpperCase()}
         </div>
+        <div className="text-indigo-700 font-semibold text-lg">
+            @{post.username}
+        </div>
+    </div>
+
+    {/* Post text */}
+    <div className="text-gray-800 text-base leading-relaxed tracking-wide">
+        {post.content}
+    </div>
+
+    {/* Post image */}
+    {post.imageId && imageUrl && (
+    <div
+        className={`rounded-xl overflow-hidden border border-gray-300 shadow-sm w-full flex justify-center items-center`}
+        style={{
+            maxHeight: "550px", // Maximum height for really tall images
+            minHeight: "100px", // Minimum height for tiny images
+        }}
+    >
+        <img
+            src={imageUrl}
+            alt={`Post by ${post.email}`}
+            className="w-full max-h-[600px] object-cover rounded-xl"
+        />
+    </div>
+)}
+
+    {/* Like + actions */}
+    <div className="flex items-center gap-3 mt-2">
+        <button
+            onClick={handleLikeToggle}
+            className={`text-3xl transition-transform transform active:scale-125 ${
+                liked
+                    ? "text-red-500"
+                    : "text-gray-400 hover:text-red-500 hover:scale-110"
+            }`}
+        >
+            {liked ? "❤︎" : "❤︎"}
+        </button>
+        <span className="text-gray-600 text-sm font-medium">
+            {likeCount} {likeCount === 1 ? "like" : "likes"}
+        </span>
+    </div>
+
+    {/* Delete button (only for owner or admin) */}
+    {(post.userId === user.$id ||
+        user.$id === import.meta.env.VITE_ADMIN_USER_ID) && (
+        <div className="flex justify-end mt-3">
+            <button
+                onClick={() => handleDelete(post.$id)}
+                className="text-sm text-red-600 hover:text-white hover:bg-red-600 font-medium px-4 py-1.5 rounded-full border border-red-300 transition"
+                title="Delete your post"
+            >
+                ❌ Delete
+            </button>
+        </div>
+    )}
+</div>
+
 
     )
 }
