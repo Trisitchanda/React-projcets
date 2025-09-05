@@ -1,16 +1,17 @@
-// src/pages/Home.js
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import PostBox from '../components/PostBox';
 import PostList from '../components/PostList';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import LightRays from '../components/LightRays';
 import GradientText from '../components/GradientText';
+import Profile from '../components/Profile';
 
 const Home = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const timelineRef = useRef(null);
+  const [showProfile, setShowProfile] = useState(false); // 🔑 state for modal
 
   const scrollToTop = () => {
     if (timelineRef.current) {
@@ -39,25 +40,45 @@ const Home = () => {
       />
 
       {/* Main layout */}
-      <div className="absolute mt-2.5  inset-0 z-10 flex justify-center px-2 sm:px-4">
+      <div className="absolute mt-2.5 inset-0 z-10 flex justify-center px-2 sm:px-4">
         <div className="flex gap-4 w-full max-w-7xl">
 
           {/* Left Sidebar */}
-          <div className="hidden md:flex w-1/5 flex-col items-start gap-6 
-                          bg-white/10 backdrop-blur-xl rounded-2xl p-4 
-                          border border-white/20 shadow-xl h-screen sticky top-0">
-            <h2 className="text-xl font-bold">Menu</h2>
-            <nav className="flex flex-col gap-3 w-full">
-              <button
-                onClick={scrollToTop}
-                className="text-left  px-3 py-2 rounded-lg hover:bg-white/10 transition"
-              >
-                🏠 Home
-              </button>
-              {/* <button className="text-left px-3 py-2 rounded-lg hover:bg-white/10 transition">🔔 Notifications</button>
-              <button className="text-left px-3 py-2 rounded-lg hover:bg-white/10 transition">✉️ Messages</button>
-              <button className="text-left px-3 py-2 rounded-lg hover:bg-white/10 transition">⚙️ Settings</button> */}
-            </nav>
+          <div className="hidden md:flex w-1/5 flex-col justify-between 
+                bg-white/10 backdrop-blur-xl rounded-2xl p-4 
+                border border-white/20 shadow-xl h-screen sticky top-0">
+
+            {/* Top Menu */}
+            <div>
+              <h2 className="text-xl font-bold mb-4">Menu</h2>
+              <nav className="flex flex-col gap-3 w-full">
+                <button
+                  onClick={scrollToTop}
+                  className="text-left px-3 py-2 rounded-lg hover:bg-white/10 transition"
+                >
+                  🏠 Home
+                </button>
+              </nav>
+            </div>
+
+            {/* Bottom Avatar  */}
+            <div
+              onClick={() => setShowProfile(true)}
+              className="mt-auto flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-white/10 cursor-pointer transition"
+            >
+              {/* Avatar  */}
+              <div className="w-12 h-12 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold">
+                {user.name?.charAt(0).toUpperCase()}
+              </div>
+
+              {/* User info */}
+              <div className="flex flex-col overflow-hidden">
+                <span className="font-medium text-black truncate">{user.name}</span>
+                <span className="text-sm text-black/60 truncate">
+                  @{user.username || user.name || "user"}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Center Timeline */}
@@ -68,19 +89,17 @@ const Home = () => {
                        border border-white/20 shadow-2xl 
                        custom-scrollbar"
           >
-            {/* Header  */}
+            {/* Header */}
             <div className="sticky top-0 z-20 bg-transparent backdrop-blur-lg py-4 px-4 sm:px-6 border-b border-white/20 flex justify-between items-center">
               <div className="text-xl sm:text-2xl font-semibold tracking-wide">
                 <GradientText
-                  colors={["#2ecc9a", "#1fa89a", "#345dcf", "#5b2fa0", "#2ecc9a"]
-                }
+                  colors={["#2ecc9a", "#1fa89a", "#345dcf", "#5b2fa0", "#2ecc9a"]}
                   animationSpeed={8}
                   showBorder={false}
                 >
                   ✨ Welcome, {user.name}
                 </GradientText>
               </div>
-
 
               <button
                 onClick={logout}
@@ -97,19 +116,6 @@ const Home = () => {
               <PostList />
             </div>
           </div>
-
-          {/* Right Sidebar */}
-          {/* <div className="hidden lg:flex w-1/4 flex-col gap-6 
-                          bg-white/10 backdrop-blur-xl rounded-2xl p-4 
-                          border border-white/20 shadow-xl h-screen sticky top-0">
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-full px-3 py-2 rounded-lg bg-white/20 backdrop-blur-sm 
-                         border border-white/30 placeholder-white/70 text-white 
-                         focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div> */}
         </div>
       </div>
 
@@ -117,8 +123,19 @@ const Home = () => {
       <div className="md:hidden fixed bottom-0 inset-x-0 bg-white/10 backdrop-blur-lg border-t border-white/20 flex justify-around py-2 z-50">
         <button onClick={scrollToTop} className="p-2">🏠</button>
       </div>
-    </div>
 
+      {/*  Profile Modal */}
+      {showProfile && (
+        <Profile
+          user={user}
+          updateProfile={(data) => {
+            console.log("Update profile with:", data);
+            setShowProfile(false);
+          }}
+          closeModal={() => setShowProfile(false)}
+        />
+      )}
+    </div>
   );
 };
 
