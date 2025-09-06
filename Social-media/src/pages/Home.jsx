@@ -93,7 +93,7 @@ const Home = () => {
             <div className="sticky top-0 z-20 bg-transparent backdrop-blur-lg py-4 px-4 sm:px-6 border-b border-white/20 flex justify-between items-center">
               <div className="text-xl sm:text-2xl font-semibold tracking-wide">
                 <GradientText
-                  colors={["#2ecc9a", "#1fa89a", "#345dcf", "#5b2fa0", "#2ecc9a"]}
+                  colors={["#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa"]}
                   animationSpeed={8}
                   showBorder={false}
                 >

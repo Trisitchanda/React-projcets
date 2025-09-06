@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Storage } from "appwrite";
 import { client } from "../config/Appwite";
 import { usePosts } from "../context/PostContext";
 import { Databases } from "appwrite";
+import ConfirmModal from "./ConfirmModal ";
+import { HiOutlineDotsHorizontal } from "react-icons/hi";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
+
 
 const storage = new Storage(client);
 const databases = new Databases(client);
@@ -15,13 +19,15 @@ const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION;
 const Post = ({ post, index }) => {
   const { user } = useAuth();
   const { posts, deletePost } = usePosts();
-
   const [imageUrl, setImageUrl] = useState("");
   const [liked, setLiked] = useState(post.likes?.includes(user.$id));
   const [likeCount, setLikeCount] = useState(post.likes?.length || 0);
-
+  const [postToDelete, setPostToDelete] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(post.content);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
 
   // Fetch post image if available
   useEffect(() => {
@@ -32,6 +38,22 @@ const Post = ({ post, index }) => {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleDeleteClick = (id) => {
+    setPostToDelete(id);
+    setShowConfirm(true);
+    setShowMenu(false);
+  };
 
   // Delete post
   const handleDelete = async (id) => {
@@ -44,6 +66,8 @@ const Post = ({ post, index }) => {
 
       if (postToDelete.userId === user.$id || user.$id === import.meta.env.VITE_ADMIN_USER_ID) {
         await deletePost(id, user.$id);
+        setShowConfirm(false);
+        setPostToDelete(null);
       } else {
         alert("You don't have permission to delete this post.");
       }
@@ -137,11 +161,14 @@ const Post = ({ post, index }) => {
       <div className="flex items-center gap-3 mt-2">
         <button
           onClick={handleLikeToggle}
-          className={`text-3xl transition-transform transform active:scale-125 ${
-            liked ? "text-red-500" : "text-gray-400 hover:text-red-500 hover:scale-110"
-          }`}
+          className={`text-3xl transition-transform transform active:scale-125 ${liked ? "text-red-500" : "text-gray-400 hover:text-red-500 hover:scale-110"
+            }`}
         >
-          {liked ? "❤︎" : "❤︎"}
+          {liked ? (
+            <FaHeart className="cursor-pointer text-red-500 text-2xl hover:scale-110 transition-transform" />
+          ) : (
+            <FaRegHeart className="cursor-pointer text-gray-400 text-2xl hover:text-red-500 hover:scale-110 transition-transform" />
+          )}
         </button>
         <span className="text-gray-600 text-sm font-medium">
           {likeCount} {likeCount === 1 ? "like" : "likes"}
@@ -150,43 +177,68 @@ const Post = ({ post, index }) => {
 
       {/* Edit & Delete buttons (owner or admin) */}
       {(post.userId === user.$id || user.$id === import.meta.env.VITE_ADMIN_USER_ID) && (
-        <div className="flex justify-end mt-3 gap-2">
-          {isEditing ? (
-            <>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="px-3 py-1.5 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+        <div className="absolute top-4 right-4" ref={menuRef}>
+          <button 
+            onClick={() => setShowMenu((prev) => !prev)}
+            className="cursor-pointer p-2 rounded-full hover:bg-gray-100 transition"
+          >
+            <HiOutlineDotsHorizontal size={20} />
+          </button>
+
+          {/* Dropdown Menu */}
+          {showMenu && (
+            <div className=" absolute right-0 mt-2 w-48 bg-white shadow-xl rounded-xl border border-gray-100 z-50 overflow-hidden backdrop-blur-sm bg-white/95">
+              <button 
+                onClick={() => {
+                  setIsEditing(true);
+                  setShowMenu(false);
+                }}
+                className="block cursor-pointer w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 transition-all duration-200 flex items-center gap-2 border-b border-gray-100"
               >
-                Cancel
+                <span className="text-blue-500 ">✏️</span>
+                <span className="font-medium">Edit Post</span>
               </button>
-              <button
-                onClick={handleEditSave}
-                className="px-3 py-1.5 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition"
+              <button 
+                onClick={() => handleDeleteClick(post.$id)}
+                className="cursor-pointer block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center gap-2"
               >
-                Save
+                <span className="text-red-500 font-bold ">🗑️</span>
+                <span className="font-medium">Delete Post</span>
               </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="text-sm text-blue-500 hover:text-white hover:bg-blue-500 font-medium px-4 py-1.5 rounded-full border border-blue-300 transition"
-                title="Edit your post"
-              >
-                ✏️ Edit
-              </button>
-              <button
-                onClick={() => handleDelete(post.$id)}
-                className="text-sm text-red-600 hover:text-white hover:bg-red-600 font-medium px-4 py-1.5 rounded-full border border-red-300 transition"
-                title="Delete your post"
-              >
-                ❌ Delete
-              </button>
-            </>
+            </div>
           )}
         </div>
       )}
+
+      {isEditing && (
+        <div className="flex justify-end mt-4 gap-3 backdrop-blur-sm bg-white/30 p-2 rounded-xl">
+          <button
+            onClick={() => setIsEditing(false)}
+            className=" cursor-pointer px-4 py-2 rounded-xl bg-white/80 text-gray-700 hover:bg-white transition-all duration-200 border border-white/30 font-medium shadow-sm"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleEditSave}
+            className="cursor-pointer px-4 py-2 rounded-xl bg-blue-500/90 text-white hover:bg-blue-600 transition-all duration-200 font-medium shadow-md backdrop-blur-sm"
+          >
+            Save Changes
+          </button>
+        </div>
+      )}
+
+      <ConfirmModal
+        isOpen={showConfirm}
+        title="Delete Post?"
+        message="Are you sure you want to delete this post? This action cannot be undone."
+        onConfirm={() => handleDelete(postToDelete)}
+        onCancel={() => {
+          setShowConfirm(false);
+          setPostToDelete(null);
+        }}
+      />
     </div>
+
   );
 };
 
